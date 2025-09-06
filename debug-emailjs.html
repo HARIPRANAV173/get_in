@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple EmailJS Debug Test</title>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"
+    ></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .test-section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ccc;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+      }
+      .success {
+        color: green;
+      }
+      .error {
+        color: red;
+      }
+      .info {
+        color: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔧 EmailJS Debug Test</h1>
+
+    <div class="test-section">
+      <h3>Test 1: Basic EmailJS Connection</h3>
+      <input
+        type="email"
+        id="testEmail1"
+        placeholder="Your Gmail address"
+        style="width: 300px"
+      />
+      <button onclick="testBasicEmail()">Send Basic Test Email</button>
+      <div id="result1"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>Test 2: OTP Template Test</h3>
+      <input
+        type="email"
+        id="testEmail2"
+        placeholder="Your Gmail address"
+        style="width: 300px"
+      />
+      <button onclick="testOTPTemplate()">Send OTP Template Test</button>
+      <div id="result2"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>Test 3: Service & Template Validation</h3>
+      <button onclick="validateSetup()">Check EmailJS Setup</button>
+      <div id="result3"></div>
+    </div>
+
+    <script>
+      // Initialize EmailJS
+      const PUBLIC_KEY = "LBJgSdgpYpTjqWksd";
+      const SERVICE_ID = "service_xw96qxf";
+      const TEMPLATE_ID = "template_kgpg70b";
+
+      console.log("Initializing EmailJS with:", {
+        PUBLIC_KEY,
+        SERVICE_ID,
+        TEMPLATE_ID,
+      });
+      emailjs.init(PUBLIC_KEY);
+
+      async function testBasicEmail() {
+        const email = document.getElementById("testEmail1").value;
+        const resultDiv = document.getElementById("result1");
+
+        if (!email) {
+          resultDiv.innerHTML =
+            '<span class="error">Please enter your email address</span>';
+          return;
+        }
+
+        resultDiv.innerHTML =
+          '<span class="info">Sending basic test email...</span>';
+
+        try {
+          const templateParams = {
+            to_email: email,
+            message: "This is a basic test email from EmailJS",
+          };
+
+          console.log("Sending basic email with params:", templateParams);
+
+          const result = await emailjs.send(
+            SERVICE_ID,
+            TEMPLATE_ID,
+            templateParams
+          );
+
+          console.log("Basic email success:", result);
+          resultDiv.innerHTML = `<span class="success">✅ Basic email sent! Status: ${result.status}, Text: ${result.text}</span>`;
+        } catch (error) {
+          console.error("Basic email error:", error);
+          resultDiv.innerHTML = `<span class="error">❌ Error: ${
+            error.message || error
+          }</span>`;
+        }
+      }
+
+      async function testOTPTemplate() {
+        const email = document.getElementById("testEmail2").value;
+        const resultDiv = document.getElementById("result2");
+
+        if (!email) {
+          resultDiv.innerHTML =
+            '<span class="error">Please enter your email address</span>';
+          return;
+        }
+
+        resultDiv.innerHTML =
+          '<span class="info">Sending OTP template test...</span>';
+
+        try {
+          const templateParams = {
+            to_email: email,
+            otp_code: "123456",
+            user_role: "test_user",
+            expires_in: "5 minutes",
+          };
+
+          console.log("Sending OTP template with params:", templateParams);
+
+          const result = await emailjs.send(
+            SERVICE_ID,
+            TEMPLATE_ID,
+            templateParams
+          );
+
+          console.log("OTP template success:", result);
+          resultDiv.innerHTML = `<span class="success">✅ OTP template email sent! Status: ${result.status}, Text: ${result.text}</span>`;
+        } catch (error) {
+          console.error("OTP template error:", error);
+          resultDiv.innerHTML = `<span class="error">❌ Error: ${
+            error.message || error
+          }</span>`;
+        }
+      }
+
+      function validateSetup() {
+        const resultDiv = document.getElementById("result3");
+
+        resultDiv.innerHTML = `
+                <div class="info">
+                    <strong>Your EmailJS Configuration:</strong><br>
+                    Public Key: ${PUBLIC_KEY}<br>
+                    Service ID: ${SERVICE_ID}<br>
+                    Template ID: ${TEMPLATE_ID}<br>
+                    <br>
+                    <strong>Next Steps:</strong><br>
+                    1. Go to <a href="https://dashboard.emailjs.com" target="_blank">EmailJS Dashboard</a><br>
+                    2. Check if service "${SERVICE_ID}" exists and is connected to Gmail<br>
+                    3. Check if template "${TEMPLATE_ID}" exists with variables: to_email, otp_code, user_role, expires_in<br>
+                    4. Check your EmailJS usage limits (free tier = 200 emails/month)<br>
+                </div>
+            `;
+      }
+    </script>
+  </body>
+</html>

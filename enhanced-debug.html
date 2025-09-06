@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Enhanced EmailJS Debug</title>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"
+    ></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .test-section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ccc;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+      }
+      .success {
+        color: green;
+      }
+      .error {
+        color: red;
+        white-space: pre-wrap;
+      }
+      .info {
+        color: blue;
+      }
+      .debug {
+        background: #f5f5f5;
+        padding: 10px;
+        margin: 10px 0;
+        font-family: monospace;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔧 Enhanced EmailJS Debug</h1>
+
+    <div class="test-section">
+      <h3>Quick Test</h3>
+      <input
+        type="email"
+        id="quickEmail"
+        placeholder="venniladevi57@gmail.com"
+        value="venniladevi57@gmail.com"
+        style="width: 300px"
+      />
+      <button onclick="quickTest()">Quick OTP Test</button>
+      <div id="quickResult"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>Debug Console</h3>
+      <div id="debugConsole" class="debug">Initializing...</div>
+    </div>
+
+    <script>
+      const PUBLIC_KEY = "LBJgSdgpYpTjqWksd";
+      const SERVICE_ID = "service_yowvfc9";
+      const TEMPLATE_ID = "template_kgpg70b";
+
+      const debugConsole = document.getElementById("debugConsole");
+
+      function log(message) {
+        console.log(message);
+        debugConsole.innerHTML += message + "\n";
+      }
+
+      function logError(message, error) {
+        console.error(message, error);
+        const errorStr = JSON.stringify(error, null, 2);
+        debugConsole.innerHTML += `ERROR: ${message}\n${errorStr}\n`;
+      }
+
+      log("Initializing EmailJS...");
+      log(`Public Key: ${PUBLIC_KEY}`);
+      log(`Service ID: ${SERVICE_ID}`);
+      log(`Template ID: ${TEMPLATE_ID}`);
+
+      try {
+        emailjs.init(PUBLIC_KEY);
+        log("✅ EmailJS initialized successfully");
+      } catch (error) {
+        logError("❌ EmailJS initialization failed:", error);
+      }
+
+      async function quickTest() {
+        const email = document.getElementById("quickEmail").value;
+        const resultDiv = document.getElementById("quickResult");
+
+        if (!email) {
+          resultDiv.innerHTML = '<span class="error">Please enter email</span>';
+          return;
+        }
+
+        log(`\n--- Starting test for ${email} ---`);
+        resultDiv.innerHTML = '<span class="info">Testing...</span>';
+
+        try {
+          const templateParams = {
+            to_email: email,
+            otp_code: "123456",
+            user_role: "test",
+            expires_in: "5 minutes",
+          };
+
+          log("Template params: " + JSON.stringify(templateParams, null, 2));
+
+          const result = await emailjs.send(
+            SERVICE_ID,
+            TEMPLATE_ID,
+            templateParams
+          );
+
+          log("✅ Success! Result: " + JSON.stringify(result, null, 2));
+          resultDiv.innerHTML = `<span class="success">✅ Email sent successfully!<br>Status: ${result.status}<br>Text: ${result.text}</span>`;
+        } catch (error) {
+          logError("❌ Send failed:", error);
+
+          let errorMessage = "Unknown error";
+          if (error.text) errorMessage = error.text;
+          else if (error.message) errorMessage = error.message;
+          else if (typeof error === "string") errorMessage = error;
+
+          resultDiv.innerHTML = `<span class="error">❌ Failed: ${errorMessage}<br><br>Full error details in debug console below</span>`;
+        }
+      }
+
+      // Test EmailJS connection immediately
+      setTimeout(() => {
+        log("\n--- Testing EmailJS availability ---");
+        if (typeof emailjs !== "undefined") {
+          log("✅ EmailJS library loaded");
+          if (emailjs.send) {
+            log("✅ emailjs.send method available");
+          } else {
+            log("❌ emailjs.send method not available");
+          }
+        } else {
+          log("❌ EmailJS library not loaded");
+        }
+      }, 1000);
+    </script>
+  </body>
+</html>
